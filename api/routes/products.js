@@ -7,9 +7,24 @@ const mongoose =  require('mongoose'); //for database connectivity
 
 router.get('/' ,(req , res , next) => {
     //we can use queries like where  , limit , from after find() function to provide it desired result 
-    Product.find().exec().then(docs => {
+    Product.find().select("name price _id").exec().then(docs => {
+        const response = {
+            count: docs.length,
+            products: docs.map((item,index) => {
+                return {
+                    name:item.name,
+                    price:item.price,
+                    id:item._id,
+                    request:{
+                        type:"GET",
+                        url:'http://localhost:3000/products/' + item._id
+                    }
+
+                }
+            })
+        }
         console.log(docs , "all docs")
-        res.status(200).json({docs})
+        res.status(200).json({response})
         
     })
     .catch(err => {
@@ -30,18 +45,30 @@ router.post('/', (req,res , next) => {
 
     })
     //save method is provided by mongoose to store data into database and exec() method we are using it to use it as a promise 
-    product.save().then(res => {
-        console.log(res ,"result ");
+    product.save().then(result => {
+        console.log(result ,"result ");
+        res.status(201).json({
+            message: 'Created product successfully ',
+            createdProduct: {
+                name:result.name,
+                price:result.price,
+                _id:result._id,
+                request:{
+                    type: "GET",
+                    url: 'http://localhost:3000/products/' + result._id
+                }
+            }
+        })
         
     }).catch(err => {
         console.log(err ,"error occured");
+        res.status(500).json({
+            error:err
+        })
         
     })
     //we are having body option in request with  name on rhs means we are expecting the name key when we send data
-    res.status(200).json({
-        message: 'handling products post request ',
-        product: product
-    })
+    
 })
 
 
@@ -50,14 +77,17 @@ router.get('/:productId', (req, res, next) => {
     //this is for some special case if we want 
     //id is accessible in request.params.name we provided to it initally while declaring 
   //Product is a object which we have imported and findById is used to find id as name suggest 
-    Product.findById(id)
+    Product.findById(id).select('name price _id')
     // .select('name price _id') we can use to take how many fields are having need
     .exec()
     .then(doc => {
         console.log(doc ,"response ");
         //here if and else is checking the invalid id entered or  not 
         if(doc){
-            res.status(200).json({ doc }); //used to return status with result 
+            res.status(200).json({ doc,request:{
+                type:'GET',
+                "url":"http://localhost:3000/products"
+            } }); //used to return status with result 
         }
         else{
             res.status(404).json( {message:'No valid entry found'})
@@ -82,7 +112,13 @@ router.patch('/:productId', (req, res, next) => {
  //update takes two parameter first the id and second is the full object that needs to be changed which is updateOps in this case 
  // set is inbuilt function of  mongoose to patch details
  Product.update({_id:id},{$set:updateOps}).exec().then(result => {
-     res.status(200).json(result)
+     res.status(200).json({
+         message:"Product successfully updated",
+         request:{
+             type:"Get",
+             url:"http://localhost:3000/products/"+id
+         }
+     })
  })
  .catch(err => {
      console.log(err ,"error occurred during patch");
@@ -95,7 +131,9 @@ router.delete('/:productId', (req, res, next) => {
     const id = req.params.productId
   Product.remove({_id :id}).exec().then(result => {
       console.log('deleted product id')
-    res.status(200).json(result)
+    res.status(200).json({
+        message:"product deleted successfully"
+    })
   })
   .catch(err => {
     res.status(500).json({error:err})

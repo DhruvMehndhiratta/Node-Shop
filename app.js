@@ -10,6 +10,7 @@ const productRoute =require('./api/routes/products');
 const orderRoute = require('./api/routes/orders');
 
 mongoose.connect('mongodb://node-shop:node123@ds117362.mlab.com:17362/node-shop')
+mongoose.Promise = global.Promise;//just used to remove warning of mongoose.connect deprecated
 
 //morgan  is a kind of middleware where all api calls pass through it and which provides console of type of api with url and status of api call and we have to use it before api call like below is api call so we have used it just above it 
 //morgan is also equivalent to next function of 3 parameter where we called our api it said it will do nothing you guys carry on with work i will just log things
