@@ -19,7 +19,6 @@ router.get('/' ,(req , res , next) => {
                         type:"GET",
                         url:'http://localhost:3000/products/' + item._id
                     }
-
                 }
             })
         }
@@ -37,13 +36,13 @@ router.get('/' ,(req , res , next) => {
 //the first parameter is '/' because we have already declared actual path needed in app.js 
 
 router.post('/', (req,res , next) => {
-
+//here we are using new keyword to create new object to be posted
     const product = new Product({
         _id:new mongoose.Types.ObjectId(),
         name:req.body.name,
         price:req.body.price
-
     })
+    
     //save method is provided by mongoose to store data into database and exec() method we are using it to use it as a promise 
     product.save().then(result => {
         console.log(result ,"result ");
