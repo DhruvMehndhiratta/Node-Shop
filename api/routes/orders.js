@@ -19,7 +19,7 @@ router.get('/' , (req ,res ,next) => {
                         quantity:item.quantity,
                         request:{
                             type:"GET",
-                            url:"http://localhsot:3000/orders" +item._id
+                            url:"http://localhost:3000/orders" +item._id
                         }
                     }
                 })

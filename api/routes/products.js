@@ -11,7 +11,6 @@ const storage = multer.diskStorage({
     filename:function(req , file ,cb ){
         cb(null , file.originalname );
     }
-
 }) //now we can use storage object in destination of multer here cb is al callback whenever we upload file destination and filename automatically executes
 
 
@@ -22,7 +21,6 @@ const fileFilter = (req , file ,cb ) => {
     else{   
         cb(null , false ) //and false does not upload image 
     }
-
 }
 
 const upload = multer({
@@ -38,7 +36,7 @@ const upload = multer({
 
 router.get('/' ,(req , res , next) => {
     //we can use queries like where  , limit , from after find() function to provide it desired result 
-    Product.find().select("name price _id").exec().then(docs => {
+    Product.find().select("name price _id productImage").exec().then(docs => {
         const response = {
             count: docs.length,
             products: docs.map((item,index) => {
@@ -46,6 +44,7 @@ router.get('/' ,(req , res , next) => {
                     name:item.name,
                     price:item.price,
                     id:item._id,
+                    productImage:item.productImage,
                     request:{
                         type:"GET",
                         url:'http://localhost:3000/products/' + item._id
@@ -64,6 +63,7 @@ router.get('/' ,(req , res , next) => {
     })
 })
 
+
 //the first parameter is '/' because we have already declared actual path needed in app.js 
 
 router.post('/',upload.single('productImage'), (req,res , next) => {
@@ -72,7 +72,8 @@ router.post('/',upload.single('productImage'), (req,res , next) => {
     const product = new Product({
         _id:new mongoose.Types.ObjectId(),
         name:req.body.name,
-        price:req.body.price
+        price:req.body.price,
+        productImage:req.file.path
     })
     
     //save method is provided by mongoose to store data into database and exec() method we are using it to use it as a promise 
@@ -84,6 +85,7 @@ router.post('/',upload.single('productImage'), (req,res , next) => {
                 name:result.name,
                 price:result.price,
                 _id:result._id,
+                productImage:result.productImage,
                 request:{
                     type: "GET",
                     url: 'http://localhost:3000/products/' + result._id
@@ -108,7 +110,7 @@ router.get('/:productId', (req, res, next) => {
     //this is for some special case if we want 
     //id is accessible in request.params.name we provided to it initally while declaring 
   //Product is a object which we have imported and findById is used to find id as name suggest 
-    Product.findById(id).select('name price _id')
+    Product.findById(id).select('name price _id productImage')
     // .select('name price _id') we can use to take how many fields are having need
     .exec()
     .then(doc => {

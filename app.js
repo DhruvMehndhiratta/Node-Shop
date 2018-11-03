@@ -16,6 +16,9 @@ mongoose.Promise = global.Promise;//just used to remove warning of mongoose.conn
 //morgan is also equivalent to next function of 3 parameter where we called our api it said it will do nothing you guys carry on with work i will just log things
 app.use(morgan('dev'));
 //body parser is used for the post request body parsing for now we are handling urlencoded with extended false(to handle  less data) json and json handler which is just a function 
+
+app.use(express.static('uploads'))//we are having two options either make upload route for image handling or you can make that folder publically accessible
+
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 //this below code is used to allow CORS
